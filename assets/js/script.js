@@ -23,9 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.showView = function(id) {
-        document.querySelectorAll('#home-view, .view-section').forEach(v => v.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        window.scrollTo(0, 0);
+        const target = document.getElementById(id);
+        if(target) {
+            document.querySelectorAll('#home-view, .view-section, #category-view, #all-events-view').forEach(v => v.style.display = 'none');
+            target.style.display = 'block';
+            window.scrollTo(0, 0);
+        } else {
+            // Eğer sayfa o ID'ye sahip değilse (örn: index'teyken events view açmak), sayfaya git
+            if(id.includes('event')) window.location.href = 'events.php';
+        }
     };
 
     window.openCategory = function(id, title) {
@@ -92,12 +98,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Common Auth Logics
     window.openLoginForm = (role) => { showView('login-form-view'); document.getElementById('l-title').innerText = role + ' Girişi'; };
     window.openRegisterForm = (role) => { showView('register-form-view'); document.getElementById('r-title').innerText = role + ' Kaydı'; };
-    window.doLogin = (e) => { e.preventDefault(); alert('Giriş Başarılı!'); showView('home-view'); };
-    window.doRegister = (e) => { e.preventDefault(); alert('Kayıt Başarılı!'); showView('login-view'); };
+    window.doLogin = (e) => { 
+        e.preventDefault(); 
+        alert('Giriş Başarılı!'); 
+        document.getElementById('nav-login-btn').style.display = 'none';
+        document.getElementById('nav-logout-btn').style.display = 'inline-block';
+        if(window.location.pathname.includes('login.php')) {
+            window.location.href = "index.php";
+        } else {
+            showView('home-view'); 
+        }
+    };
+    window.doRegister = (e) => { e.preventDefault(); alert('Kayıt Başarılı!'); window.location.href = "login.php"; };
     window.showAllEvents = () => {
         showView('all-events-view');
         const all = [...eventsData[1], ...eventsData[3]];
         Object.keys(eventsData[2]).forEach(c => eventsData[2][c].forEach(e => all.push(e)));
         renderEvents(all, document.getElementById('all-events-list'));
     };
+
+    // ÇIKIŞ YAPMA FONKSİYONU
+    window.doLogout = function() {
+        if(confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+            alert("Başarıyla çıkış yapıldı!");
+            document.getElementById('nav-login-btn').style.display = 'inline-block';
+            document.getElementById('nav-logout-btn').style.display = 'none';
+            window.location.href = "index.php";
+        }
+    }
 });
